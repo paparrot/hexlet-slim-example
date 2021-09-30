@@ -11,7 +11,7 @@
       <input type="text" name="user[email]" id="email">
     </label>
   </div>
-  <input type="hidden" name="user[id]">
+  <input type="hidden" name="user[id]" value="<?= htmlspecialchars($id) ?>">
   <div>
     <input type="submit" value="Отправить">
   </div>
