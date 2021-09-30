@@ -10,6 +10,8 @@ $container->set('renderer', function () {
     return new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
 });
 
+$users = ['mike', 'mishel', 'adel', 'keks', 'kamila'];
+
 $app = AppFactory::createFromContainer($container);
 $app->addErrorMiddleware(true, true, true);
 
@@ -18,8 +20,16 @@ $app->get('/', function ($request, $response) {
     return $response;
 });
 
-$app->get('/users', function ($request, $response) {
-    return $response->write('GET /users');
+$app->get('/users', function ($request, $response) use ($users) {
+    $str = $request->getQueryParam('str');
+    $filtredUsers = array_filter($users, function($user) use ($users, $str) {
+        return empty($str) ? true : strpos($user, $str);
+    });
+    $params = [
+        'users' => $filtredUsers,
+        'str' => $str
+    ];
+    return $this->get('renderer')->render($response, 'users/index.phtml', $params);
 });
 
 $app->post('/users', function ($request, $response) {

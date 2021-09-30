@@ -1,0 +1,22 @@
+<form method="GET" action="users">
+  <div>
+    <label>
+      <input type="search" name="str" value="<?= htmlspecialchars($str) ?>">
+    </label>
+  </div>
+  <div>
+    <label>
+      <input type="submit" value="Поиск">
+    </label>
+  </div>
+</form>
+
+<div>
+  <?php if (!empty($users)): ?>
+  <ul>
+    <?php foreach ($users as $user): ?>
+    <li><?= htmlspecialchars($user) ?></li>
+    <?php endforeach; ?>
+  </ul>
+  <?php endif; ?>
+</div>
