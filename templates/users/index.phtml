@@ -10,12 +10,14 @@
     </label>
   </div>
 </form>
-
+<div>
+<a href='/users/new'>Создать нового пользователя</a>
+</div>
 <div>
   <?php if (!empty($users)): ?>
   <ul>
     <?php foreach ($users as $user): ?>
-    <li><?= htmlspecialchars($user) ?></li>
+    <li><?= htmlspecialchars($user['nickname']) ?></li>
     <?php endforeach; ?>
   </ul>
   <?php endif; ?>

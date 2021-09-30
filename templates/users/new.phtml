@@ -1,0 +1,19 @@
+<form action="/users" method="post">
+  <div>
+    <label>
+      Никнейм: 
+      <input type="text" name="user[nickname]" id="nickname">
+    </label>
+  </div>
+  <div>
+    <label>
+      Email: 
+      <input type="text" name="user[email]" id="email">
+    </label>
+  </div>
+  <input type="hidden" name="user[id]">
+  <div>
+    <input type="submit" value="Отправить">
+  </div>
+</form>
+<a href="/users">Ко всем пользователям</a>
