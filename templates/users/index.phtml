@@ -1,7 +1,9 @@
-<?php foreach ($flash as $messages): ?>
-<?php foreach ($messages as $message): ?>
-<p><?= $message ?></p>
-<?php endforeach; ?>
+<?php foreach ($flash as $key => $messages): ?>
+    <?php foreach ($messages as $message): ?>
+      <div class="alert alert-<?= htmlspecialchars($key) ?>">
+        <?= htmlspecialchars($message) ?>
+      </div>
+    <?php endforeach; ?>
 <?php endforeach; ?>
 <div class="row">
   <div class="col">
@@ -29,10 +31,17 @@
     <?php if (!empty($users)): ?>
     <ul class="list-group mt-3">
       <?php foreach ($users as $user): ?>
-      <li class="list-group-item d-flex justify-content-between">
-        <a href="/users/<?= $user['id'] ?>" class="link-primary"
-          ><?= htmlspecialchars($user['nickname']) ?></a
-        >
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+          <a 
+            href="/users/<?= htmlspecialchars($user['id']) ?>" 
+            class="link-primary"
+          >
+          <?= htmlspecialchars($user['nickname']) ?>
+        </a>
+        <form action="/users/<?= htmlspecialchars($user['id']) ?>" method="post">
+          <input type="hidden" name="_METHOD" value="DELETE">
+          <button class="btn btn-danger" type="submit">&times;</button>
+        </form>
       </li>
       <?php endforeach; ?>
     </ul>

@@ -1,25 +1,30 @@
-<form action="/users" method="post" class="mt-3 card d-flex flex-column p-3">
-      <input
-        type="text"
-        class="form-control mb-3"
-        placeholder="Никнейм"
-        name="user[nickname]"
-        id="nickname"
-        value="<?= htmlspecialchars($user['nickname']) ?>"
-      />
-      <input
-        type="email"
-        class="form-control mb-3"
-        placeholder="Email"
-        name="user[email]"
-        id="email"
-        value="<?= htmlspecialchars($user['email']) ?>"
-      />
-      <input
-        type="hidden"
-        name="user[id]"
-        value="<?= htmlspecialchars($user['id']) ?>"
-        id="id"
-      />
-      <button class="btn btn-primary">Создать</button>
-</form>
+<?php if (isset($errors['nickname'])): ?>
+  <div class="text-danger"><?= $errors['nickname'] ?></div>
+<?php endif ?>
+<input
+  type="text"
+  class="form-control mb-3"
+  placeholder="Никнейм"
+  name="user[nickname]"
+  id="nickname"
+  require
+  value="<?= htmlspecialchars($user['nickname']) ?>"
+/>
+<?php if (isset($errors['email'])): ?>
+  <div class="text-danger"><?= $errors['email'] ?></div>
+<?php endif ?>
+<input
+  type="email"
+  class="form-control mb-3"
+  placeholder="Email"
+  name="user[email]"
+  id="email"
+  require
+  value="<?= htmlspecialchars($user['email']) ?>"
+/>
+<input
+  type="hidden"
+  name="user[id]"
+  value="<?= htmlspecialchars($id) ?>"
+  id="id"
+/>

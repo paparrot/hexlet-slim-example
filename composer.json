@@ -3,7 +3,7 @@
     "description": "Slim example app",
     "autoload": {
         "psr-4": {
-            "Paparrot\\HexletSlimExample\\": "src/"
+            "App\\": "src/"
         }
     },
     "authors": [
