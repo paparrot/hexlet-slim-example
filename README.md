@@ -1,4 +1,6 @@
-# Пример CRUD на PHP + микрофреймворке SLIM 
+# Пример CRUD на PHP + микрофреймворке SLIM
+
+## [Демо](https://slim-crud.herokuapp.com/login)
 
 ## Установка
 
