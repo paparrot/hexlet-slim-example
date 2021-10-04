@@ -1,0 +1,17 @@
+<div class="row">
+  <div class="col col-md-8 offset-md-2">
+    <?php if (!empty($flash)): ?>
+      <?php foreach ($flash as $key => $messages): ?>
+        <?php foreach ($messages as $message): ?>
+          <div class="alert alert-<?= $key ?>">
+            <?= $message ?>
+          </div>
+        <?php endforeach; ?>
+      <?php endforeach; ?>
+    <?php endif; ?>
+    <form action="/session" method="post" class="card p-2">
+      <input type="email" name="email" placeholder="Email" class="form-control mb-3">
+      <input type="submit" class="btn btn-primary w-100" value="Войти">
+    </form>
+  </div>
+</div>

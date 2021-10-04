@@ -9,7 +9,6 @@ use App\Validator;
 
 session_start();
 
-
 $container = new Container();
 $container->set('renderer', function () {
     $phpView = new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
@@ -25,16 +24,48 @@ $app->add(MethodOverrideMiddleware::class);
 $app->addErrorMiddleware(true, true, true);
 $router = $app->getRouteCollector()->getRouteParser();
 
+$adminEmail = "example@example.com";
+
 function getUsers($request): array
 {
     return json_decode($request->getCookieParam("users", json_encode([])), true);
 }
 
-$app->get('/', function($request, $response) {
+
+$app->get("/login", function($request, $response) {
+    $flash = $this->get('flash')->getMessages();
+    return $this->get("renderer")->render($response, 'login.phtml', ['flash' => $flash]);
+})->setName("login");
+
+$app->get('/', function($request, $response) use ($router) {
+    if (!isset($_SESSION['isAdmin'])) {
+        return $response->withRedirect($router->urlFor("login"), 302);
+    }
     return $this->get('renderer')->render($response, 'index.phtml');
 })->setName("index");
 
-$app->get("/users", function ($request, $response) {
+$app->post('/session', function ($request, $response) use ($adminEmail, $router) {
+    $data = $request->getParsedBodyParam("email");
+    if ($data === $adminEmail) {
+        $_SESSION['isAdmin'] = true;
+        $this->get('flash')->addMessage("success", "Вход выполнен"); 
+        return $response->withRedirect($router->urlFor("users"), 302);
+    } else {
+        $this->get('flash')->addMessage("danger", "Неверный логин"); 
+        return $response->withRedirect($router->urlFor('login'), 302);
+    }
+});
+
+$app->delete("/session", function ($request, $response) use ($router) {
+    $_SESSION = [];
+    return $response->withRedirect($router->urlFor("index"), 302);
+});
+
+$app->get("/users", function ($request, $response) use ($router) {
+
+    if (!isset($_SESSION['isAdmin'])) {
+        return $response->withRedirect($router->urlFor("login"));
+    }
 
     $users = getUsers($request);
     $queryString = $request->getQueryParam("str");
@@ -55,11 +86,21 @@ $app->get("/users", function ($request, $response) {
     return $this->get("renderer")->render($response, 'users/index.phtml', $params);
 })->setName("users");
 
-$app->get("/users/new", function($request, $response) {
+$app->get("/users/new", function($request, $response) use ($router) {
+
+    if (!isset($_SESSION['isAdmin'])) {
+        return $response->withRedirect($router->urlFor("login"));
+    }
+
     return $this->get("renderer")->render($response, "users/new.phtml");
 });
 
-$app->get("/users/{id}", function ($request, $response, array $args)  {
+$app->get("/users/{id}", function ($request, $response, array $args) use ($router)  {
+
+    if (!isset($_SESSION['isAdmin'])) {
+        return $response->withRedirect($router->urlFor("login"));
+    }
+
     $users = getUsers($request);
     $id = $args['id'];
     $user = $users[$id];
@@ -104,7 +145,12 @@ $app->post("/users", function ($request, $response) use ($router) {
     return $this->get('renderer')->render($response, '/users/new.phtml', $params);
 });
 
-$app->get("/users/{id}/edit", function($request, $response, array $args) {
+$app->get("/users/{id}/edit", function($request, $response, array $args) use ($router) {
+
+    if (!isset($_SESSION['isAdmin'])) {
+        return $response->withRedirect($router->urlFor("login"));
+    }
+
     $users = getUsers($request);
     $id = $args['id'];
     $user = $users[$id];
@@ -118,6 +164,7 @@ $app->get("/users/{id}/edit", function($request, $response, array $args) {
 });
 
 $app->patch("/users/{id}", function($request, $response, array $args) use ($router) {
+
     $users = getUsers($request);
     $id = $args['id'];
     $user = $users[$id];

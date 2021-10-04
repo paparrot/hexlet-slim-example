@@ -8,6 +8,19 @@
   <title>Slim CRUD</title>
 </head>
 <body>
+  <header class="bg-primary">
+      <nav class="navbar navbar-dark d-flex">
+        <div class="container">
+          <a href="/" class="navbar-brand mb-0 h1">Slim CRUD</a>
+          <?php if(isset($_SESSION['isAdmin'])): ?>
+          <form action="/session" method="post">
+            <input type="hidden" name="_METHOD" value="DELETE">
+            <button type="submit" class="btn btn-light">Выход</button>
+          </form>
+        <?php endif; ?>
+        </div>
+      </nav>
+  </header>
   <main class="container">
     <div class="mt-3">
       <?= $content ?>
