@@ -4,7 +4,7 @@
 
 ```bash
 # 1. clone repo
-git clone git@github.com:paparrot/hexlet-slim-example.git
+git clone git@github.com:paparrot/slim-crud-example.git
 # 2. install dependencies
 make install
 ```
