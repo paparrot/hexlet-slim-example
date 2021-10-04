@@ -8,7 +8,9 @@
   name="user[nickname]"
   id="nickname"
   require
+  <?php if(isset($user['nickname'])): ?>
   value="<?= htmlspecialchars($user['nickname']) ?>"
+  <?php endif; ?>
 />
 <?php if (isset($errors['email'])): ?>
   <div class="text-danger"><?= $errors['email'] ?></div>
@@ -20,11 +22,7 @@
   name="user[email]"
   id="email"
   require
+  <?php if(isset($user['email'])): ?>
   value="<?= htmlspecialchars($user['email']) ?>"
-/>
-<input
-  type="hidden"
-  name="user[id]"
-  value="<?= htmlspecialchars($id) ?>"
-  id="id"
+  <?php endif; ?>
 />

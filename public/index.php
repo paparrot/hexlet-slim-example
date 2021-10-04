@@ -27,37 +27,44 @@ $app->add(MethodOverrideMiddleware::class);
 $app->addErrorMiddleware(true, true, true);
 $router = $app->getRouteCollector()->getRouteParser();
 
+function getUsers($request): array
+{
+    return json_decode($request->getCookieParam("users", json_encode([])));
+}
+
 $app->get('/', function($request, $response) {
     return $this->get('renderer')->render($response, 'index.phtml');
 })->setName("index");
 
 $app->get("/users", function ($request, $response) use ($usersPath) {
+
     $users = json_decode(file_get_contents($usersPath), true)['users'];
     $queryString = $request->getQueryParam("str");
-    $filtredUsers = array_filter($users, function($user) use ($queryString) {
-        $queryString = mb_strtolower($queryString);
-        $userNickname = mb_strtolower($user['nickname']);
-        return empty($queryString) ? true : str_contains($userNickname, $queryString);
-    });
+    $filtredUsers = collect($users)->values()->filter(function ($user) use ($queryString) {
+        $qs = mb_strtolower($queryString);
+        $us = mb_strtolower($user['nickname']);
+        return empty($qs) ? true : str_contains($us, $qs);
+    })->all();
+
     $flash = $this->get("flash")->getMessages();
+
     $params = [
         'users' => $filtredUsers,
         'str' => $queryString,
         'flash' => $flash
     ];
+    
     return $this->get("renderer")->render($response, 'users/index.phtml', $params);
 })->setName("users");
 
 $app->get("/users/new", function($request, $response) use ($usersPath) {
-    $users = json_decode(file_get_contents($usersPath), true)['users'];
-    $id = uniqid('user-', true);
-    return $this->get("renderer")->render($response, "users/new.phtml", ['id' => $id]);
+    return $this->get("renderer")->render($response, "users/new.phtml");
 });
 
 $app->get("/users/{id}", function ($request, $response, array $args) use ($usersPath) {
     $users = json_decode(file_get_contents($usersPath), true)['users'];
     $id = $args['id'];
-    $user = collect($users)->firstWhere('id', $id);
+    $user = $users[$id];
     if (!$user) {
         return $this->get('renderer')->render($response, "/users/404.phtml")->withStatus(404);
     }
@@ -71,20 +78,26 @@ $app->post("/users", function($request, $response, array $args) use ($usersPath,
     $user = $request->getParsedBodyParam('user');
     $validator = new Validator();
     $errors = $validator->validate($user);
+    
 
     if (count($errors) === 0) {
+        $id = uniqid('user-', true);
+        $user['id'] = $id;
+
         $users = json_decode(file_get_contents($usersPath), true)['users'];
-        $users[] = $user;
+
+        $users[$id] = $user;
+
         file_put_contents($usersPath, json_encode(['users' => $users]));
         $this->get('flash')->addMessage("success", "Пользователь добавлен");
+
         $url = $router->urlFor('users');
         return $response->withRedirect($url, 302);
     }
 
     $params = [
         'user' => $user,
-        'errors' => $errors,
-        'id' => $user['id']
+        'errors' => $errors
     ];
 
     $response = $response->withStatus(422);
@@ -94,12 +107,13 @@ $app->post("/users", function($request, $response, array $args) use ($usersPath,
 $app->get("/users/{id}/edit", function($request, $response, array $args) use ($usersPath) {
     $users = json_decode(file_get_contents($usersPath), true)['users'];
     $id = $args['id'];
-    $user = collect($users)->firstWhere('id', $id);
+    $user = $users[$id];
+
     $params = [
         'user' => $user,
-        'error' => $errors,
-        'id' => $id
+        'errors' => []
     ];
+
     return $this->get("renderer")->render($response, '/users/edit.phtml', $params);
 });
 
@@ -111,24 +125,21 @@ $app->patch("/users/{id}", function($request, $response, array $args) use ($user
     $errors = $validator->validate($userData);
 
     if (count($errors) === 0) {
-        $newUsers = collect($users)->map(function ($user) use ($userData) {
-            if ($user['id'] === $userData['id']) {
-                $user['nickname'] = $userData['nickname'];
-                $user['email'] = $userData['email'];
-                return $user;
-            }
-            return $user;
-        })->all();
-        $this->get('flash')->addMessage("success", "Информация обновлена");   
+        $user = $users[$id];
+        $user['nickname'] = $userData['nickname'];
+        $user['email'] = $userData['email'];
+
+        $this->get('flash')->addMessage("success", "Информация обновлена");
+
         file_put_contents($usersPath, json_encode(['users' => $newUsers]));
+
         $url = $router->urlFor("users");
         return $response->withRedirect($url, 302);
     }
 
     $params = [
         'user' => $userData,
-        'errors' => $errors,
-        'id' => $id
+        'errors' => $errors
     ];
     
     $response = $response->withStatus(422);
@@ -138,8 +149,9 @@ $app->patch("/users/{id}", function($request, $response, array $args) use ($user
 $app->delete("/users/{id}", function($request, $response, array $args) use ($usersPath, $router) {
     $id = $args['id'];
     $users = json_decode(file_get_contents($usersPath), true)['users'];
-    $newUsers = collect($users)->filter(fn($user) => $user['id'] !== $id)->values()->all();
-    file_put_contents($usersPath, json_encode(['users' => $newUsers]));
+    unset($users[$id]);
+    file_put_contents($usersPath, json_encode(['users' => $users]));
+    
     $this->get('flash')->addMessage("success", "Пользователь удален");
     return $response->withRedirect($router->urlFor('users'), 302);
 });
