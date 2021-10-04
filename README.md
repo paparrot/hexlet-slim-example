@@ -1,16 +1,24 @@
-# Slim example app
+# Пример CRUD на PHP + микрофреймворке SLIM 
 
-## Install
+## Установка
 
 ```bash
-# 1. clone repo
+# 1. склонируйте репозиторий
 git clone git@github.com:paparrot/slim-crud-example.git
-# 2. install dependencies
+# 2. перейдите в папку проекта
+cd slim-crud-example
+# 3. установите зависимости
 make install
 ```
 
-## Usage
+## Использование
 
 ```bash
+# Для локального запуска введите команду
 make start
+# Сайт будет доступен по адресу localhost:8080
 ```
+
+## Доступ
+Для создания, поиска, обновления и удаления пользователей нужно войти в приложение. Для этого нужно ввести email: example@example.com.
+Пользователи хранятся в сессионных куках и очищаются при каждом открытии браузера.
